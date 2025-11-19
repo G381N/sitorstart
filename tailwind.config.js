@@ -7,11 +7,15 @@ module.exports = {
     extend: {
       colors: {
         perplexity: {
-          bg: '#F8F9FA',
-          text: '#202124',
-          border: '#E8EAED',
-          accent: '#1A73E8',
-          hover: '#F1F3F4'
+          bg: '#202123',
+          'bg-light': '#2A2B2E',
+          text: '#ECECEC',
+          'text-dim': '#9CA3AF',
+          border: '#3E3F42',
+          accent: '#20808D',
+          'accent-hover': '#1A6B77',
+          hover: '#2D2E30',
+          input: '#353639'
         }
       },
       fontFamily: {

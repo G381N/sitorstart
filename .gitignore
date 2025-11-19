@@ -32,3 +32,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+.vscode
+.idea
+
+# Documentation (keep only essential)
+UI_MATCHING_GUIDE.md
+REQUIREMENTS_CHECKLIST.md
+IMPLEMENTATION_SUMMARY.md
+
+# OS
+Thumbs.db
+.DS_Store

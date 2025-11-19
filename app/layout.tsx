@@ -2,8 +2,13 @@ import '../styles/globals.css'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Perplexity Clone - AI-Powered Search',
-  description: 'Pixel-perfect Perplexity AI clone with streaming responses'
+  title: 'Perplexity',
+  description: 'Where knowledge begins',
+  icons: {
+    icon: '/download.jpeg',
+    shortcut: '/download.jpeg',
+    apple: '/download.jpeg'
+  }
 }
 
 export default function RootLayout({
@@ -13,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-white text-perplexity-text antialiased">
+      <body className="bg-white text-gray-900 antialiased">
         {children}
       </body>
     </html>
