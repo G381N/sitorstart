@@ -7,27 +7,35 @@ interface Props {
 }
 
 // Function to detect and parse table-like content
-function parseTableContent(text: string) {
+function parseTableContent(text: string, isTableRequest: boolean = false) {
   const lines = text.split('\n').filter(line => line.trim())
   
-  // Simple heuristic: if we have numbered items or rows with consistent structure
-  const hasTablePattern = lines.some(line => /^\d+\./.test(line.trim()))
+  // Check for numbered list pattern
+  const numberedLines = lines.filter(line => /^\d+[\.\)]\s*/.test(line.trim()))
   
-  if (!hasTablePattern || lines.length < 3) {
-    return null
-  }
-
-  // Parse numbered list into table rows
-  const rows = lines
-    .filter(line => /^\d+\./.test(line.trim()))
-    .map(line => {
-      const match = line.match(/^\d+\.\s*(.+)/)
-      return match ? match[1].trim() : line
+  if (numberedLines.length >= 3 || isTableRequest) {
+    // Parse numbered list into table rows
+    const rows = numberedLines.map(line => {
+      const match = line.match(/^\d+[\.\)]\s*(.+)/)
+      return match ? match[1].trim() : line.trim()
     })
 
-  if (rows.length === 0) return null
+    if (rows.length > 0) return rows
+  }
 
-  return rows
+  // Check for comma-separated or dash-separated lists
+  if (isTableRequest && lines.length >= 3) {
+    const items = lines.map(line => line.replace(/^[-•*]\s*/, '').trim()).filter(Boolean)
+    if (items.length >= 3) return items
+  }
+
+  return null
+}
+
+// Check if the user's query asks for a table
+function isTableQuery(userQuery: string): boolean {
+  const tableKeywords = ['table', 'list of', 'top 10', 'top 5', 'ranking', 'singers', 'artists']
+  return tableKeywords.some(keyword => userQuery.toLowerCase().includes(keyword))
 }
 
 export default function Message({ message }: Props) {
@@ -48,7 +56,9 @@ export default function Message({ message }: Props) {
     )
   }
 
-  const tableRows = message.text ? parseTableContent(message.text) : null
+  // Check if this is a table request
+  const isTableReq = message.text ? isTableQuery(message.text) : false
+  const tableRows = message.text ? parseTableContent(message.text, isTableReq) : null
 
   return (
     <div className={`flex items-start gap-0 animate-slide-up ${visible ? 'opacity-100' : 'opacity-0'}`}>
@@ -78,25 +88,25 @@ export default function Message({ message }: Props) {
         {message.text && (
           <div className="max-w-none">
             {tableRows && tableRows.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-300 border border-gray-300 rounded-lg">
-                  <thead className="bg-gray-50">
+              <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
+                <table className="min-w-full divide-y divide-gray-300">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-300">
-                        #
+                      <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-20">
+                        Rank
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-300">
-                        Name
+                      <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Singer / Artist
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {tableRows.map((row, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-gray-600 font-medium border-r border-gray-200">
+                      <tr key={idx} className="hover:bg-blue-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-semibold text-gray-700 border-r border-gray-200">
                           {idx + 1}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">
+                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">
                           {row}
                         </td>
                       </tr>
@@ -113,6 +123,7 @@ export default function Message({ message }: Props) {
         {/* Sources */}
         {message.sources && message.sources.length > 0 && (
           <div className="animate-fade-in space-y-3 pt-2">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Sources</p>
             <div className="grid grid-cols-1 gap-2">
               {message.sources.slice(0, 9).map((source, idx) => (
                 <a
